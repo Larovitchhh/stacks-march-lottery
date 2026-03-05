@@ -10,14 +10,18 @@ export default function MintTicket() {
   const mint = async () => {
 
     const txOptions = {
-      contractAddress: "TU_CONTRACT_ADDRESS",
-      contractName: "TU_CONTRACT_NAME",
+      contractAddress: "SP1AJVMEGSMD6QCSZ1669Z5G90GEHVK2MEM7J0AHH",
+      contractName: "lottery-nft",
       functionName: "mint",
       functionArgs: [],
       network,
       appDetails: {
-        name: "Stacks Lottery",
+        name: "Stacks March Lottery",
+        icon: window.location.origin + "/logo.png",
       },
+      onFinish: (data) => {
+        console.log("Transaction submitted:", data);
+      }
     };
 
     await openContractCall(txOptions);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import ConnectWallet from "./components/ConnectWallet";
 import MintTicket from "./components/MintTicket";
 

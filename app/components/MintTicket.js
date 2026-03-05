@@ -6,15 +6,11 @@ import { useState } from "react";
 
 const network = new StacksMainnet();
 
-export default function MintTicket({ wallet }) {
+export default function MintTicket() {
   const [ticketNumber, setTicketNumber] = useState(null);
+  const [wallet, setWallet] = useState(null);
 
   const mint = async () => {
-    if (!wallet) {
-      alert("Connect your wallet first!");
-      return;
-    }
-
     const txOptions = {
       contractAddress: "SP1AJVMEGSMD6QCSZ1669Z5G90GEHVK2MEM7J0AHH",
       contractName: "lottery-nft",
@@ -25,15 +21,23 @@ export default function MintTicket({ wallet }) {
         name: "Stacks March Lottery",
         icon: window.location.origin + "/logo.png",
       },
-      onFinish: async () => {
-        // Llamada a API serverless para generar número
+      onFinish: async (data) => {
+        console.log("Transaction submitted:", data);
+
+        // 1️⃣ Sacamos la wallet de la transacción
+        const txSender = data.tx.raw_tx.sender || null;
+        if (!txSender) return;
+
+        setWallet(txSender);
+
+        // 2️⃣ Llamamos a la API serverless para generar número
         const res = await fetch("/api/mint-number", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ wallet }),
+          body: JSON.stringify({ wallet: txSender }),
         });
-        const data = await res.json();
-        setTicketNumber(data.number);
+        const result = await res.json();
+        setTicketNumber(result.number);
       },
     };
 
@@ -41,7 +45,7 @@ export default function MintTicket({ wallet }) {
   };
 
   return (
-    <>
+    <div style={{ textAlign: "center" }}>
       <button
         onClick={mint}
         style={{
@@ -51,16 +55,24 @@ export default function MintTicket({ wallet }) {
           color: "white",
           borderRadius: "8px",
           border: "none",
+          fontSize: "16px",
+          cursor: "pointer",
         }}
       >
         Mint Ticket
       </button>
 
+      {wallet && (
+        <p style={{ marginTop: "15px", fontSize: "16px" }}>
+          Wallet: {wallet}
+        </p>
+      )}
+
       {ticketNumber && (
-        <p style={{ marginTop: "15px", fontSize: "18px" }}>
+        <p style={{ marginTop: "10px", fontSize: "18px", fontWeight: "bold" }}>
           🎟️ Your ticket number: {ticketNumber}
         </p>
       )}
-    </>
+    </div>
   );
 }

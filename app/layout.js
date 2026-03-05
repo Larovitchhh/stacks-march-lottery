@@ -1,6 +1,6 @@
 export const metadata = {
   title: "Stacks March Lottery",
-  description: "Lottery app on Stacks",
+  description: "Lottery on Stacks blockchain",
 };
 
 export default function RootLayout({ children }) {

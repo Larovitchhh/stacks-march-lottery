@@ -27,11 +27,12 @@ export default function MintTicket() {
     <button
       onClick={mint}
       style={{
-        marginTop:"20px",
-        padding:"12px 20px",
-        background:"green",
-        color:"white",
-        borderRadius:"8px"
+        marginTop: "20px",
+        padding: "12px 22px",
+        background: "green",
+        color: "white",
+        borderRadius: "8px",
+        border: "none"
       }}
     >
       Mint Ticket

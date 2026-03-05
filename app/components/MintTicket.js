@@ -1,18 +1,24 @@
 "use client";
 
-import { openContractCall, UserSession, AppConfig } from "@stacks/connect";
+import { openContractCall } from "@stacks/connect";
 import { StacksMainnet } from "@stacks/network";
 import { useState } from "react";
 
 const network = new StacksMainnet();
-const appConfig = new AppConfig(["store_write"]);
-const userSession = new UserSession({ appConfig });
 
 export default function MintTicket() {
   const [ticketNumber, setTicketNumber] = useState(null);
-  const [wallet, setWallet] = useState(null);
+  const [wallet, setWallet] = useState("");
 
   const mint = async () => {
+    // Si no tenemos wallet, pedimos al usuario
+    let userWallet = wallet;
+    if (!userWallet) {
+      userWallet = prompt("Enter your Stacks wallet address to receive your ticket:");
+      if (!userWallet) return;
+      setWallet(userWallet);
+    }
+
     // Abrir wallet y mintear NFT
     const txOptions = {
       contractAddress: "SP1AJVMEGSMD6QCSZ1669Z5G90GEHVK2MEM7J0AHH",
@@ -24,22 +30,16 @@ export default function MintTicket() {
         name: "Stacks March Lottery",
         icon: window.location.origin + "/logo.png",
       },
-      onFinish: async () => {
-        // ⚡ Tomar la wallet conectada desde UserSession
-        if (userSession.isUserSignedIn()) {
-          const userData = userSession.loadUserData();
-          const userWallet = userData.profile.stxAddress.mainnet;
-          setWallet(userWallet);
-
-          // Llamar a la API serverless para generar número
-          const res = await fetch("/api/mint-number", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ wallet: userWallet }),
-          });
-          const data = await res.json();
-          setTicketNumber(data.number);
-        }
+      onFinish: () => {
+        // Después de mintear, generamos número aleatorio con fetch
+        fetch("/api/mint-number", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ wallet: userWallet }),
+        })
+          .then(res => res.json())
+          .then(data => setTicketNumber(data.number))
+          .catch(err => console.error(err));
       },
     };
 

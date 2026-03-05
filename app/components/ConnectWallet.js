@@ -1,12 +1,23 @@
 "use client";
 
-import { AppConfig, UserSession, showConnect } from "@stacks/connect";
+import { useState, useEffect } from "react";
+import { showConnect, AppConfig, UserSession } from "@stacks/connect";
 
 const appConfig = new AppConfig(["store_write"]);
 const userSession = new UserSession({ appConfig });
 
 export default function ConnectWallet({ setWallet }) {
-  const connectWallet = () => {
+  const [wallet, setLocalWallet] = useState(null);
+
+  useEffect(() => {
+    if (userSession.isUserSignedIn()) {
+      const userData = userSession.loadUserData();
+      setLocalWallet(userData.profile.stxAddress.mainnet);
+      setWallet(userData.profile.stxAddress.mainnet);
+    }
+  }, [setWallet]);
+
+  const connect = () => {
     showConnect({
       appDetails: {
         name: "Stacks March Lottery",
@@ -15,21 +26,19 @@ export default function ConnectWallet({ setWallet }) {
       userSession,
       onFinish: () => {
         const userData = userSession.loadUserData();
+        setLocalWallet(userData.profile.stxAddress.mainnet);
         setWallet(userData.profile.stxAddress.mainnet);
       },
     });
   };
 
-  // Si ya hay sesión activa, devuelve wallet
-  if (userSession.isUserSignedIn()) {
-    const userData = userSession.loadUserData();
-    setWallet(userData.profile.stxAddress.mainnet);
-    return <p>Wallet connected: {userData.profile.stxAddress.mainnet}</p>;
+  if (wallet) {
+    return <p>Wallet connected: {wallet}</p>;
   }
 
   return (
     <button
-      onClick={connectWallet}
+      onClick={connect}
       style={{
         marginTop: "20px",
         padding: "10px 20px",

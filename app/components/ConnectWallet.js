@@ -22,18 +22,23 @@ export default function ConnectWallet() {
 
   if (userSession.isUserSignedIn()) {
     const userData = userSession.loadUserData();
-    return <p>Wallet: {userData.profile.stxAddress.mainnet}</p>;
+    return (
+      <p>
+        Wallet connected: {userData.profile.stxAddress.mainnet}
+      </p>
+    );
   }
 
   return (
     <button
       onClick={connectWallet}
       style={{
-        padding:"10px 18px",
-        background:"black",
-        color:"white",
-        borderRadius:"8px",
-        marginTop:"20px"
+        marginTop: "20px",
+        padding: "10px 20px",
+        background: "black",
+        color: "white",
+        borderRadius: "8px",
+        border: "none"
       }}
     >
       Connect Wallet

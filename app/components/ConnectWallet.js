@@ -20,8 +20,10 @@ export default function ConnectWallet({ setWallet }) {
     });
   };
 
+  // Si ya hay sesión activa, devuelve wallet
   if (userSession.isUserSignedIn()) {
     const userData = userSession.loadUserData();
+    setWallet(userData.profile.stxAddress.mainnet);
     return <p>Wallet connected: {userData.profile.stxAddress.mainnet}</p>;
   }
 

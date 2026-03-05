@@ -1,5 +1,3 @@
-// pages/api/mint-number.js
-
 let usedNumbers = {}; // { wallet: number }
 
 function generateNumber() {
@@ -21,7 +19,6 @@ export default function handler(req, res) {
     }
 
     if (usedNumbers[wallet]) {
-      // ya tiene un número
       return res.status(200).json({ number: usedNumbers[wallet] });
     }
 

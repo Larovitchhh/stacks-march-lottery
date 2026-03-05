@@ -8,42 +8,46 @@ const network = new StacksMainnet();
 
 export default function MintTicket() {
   const [ticketNumber, setTicketNumber] = useState(null);
-  const [wallet, setWallet] = useState("");
+  const [wallet, setWallet] = useState(null);
 
   const mint = async () => {
-    // Si no tenemos wallet, pedimos al usuario
-    let userWallet = wallet;
-    if (!userWallet) {
-      userWallet = prompt("Enter your Stacks wallet address to receive your ticket:");
-      if (!userWallet) return;
+    try {
+      const tx = await openContractCall({
+        contractAddress: "SP1AJVMEGSMD6QCSZ1669Z5G90GEHVK2MEM7J0AHH",
+        contractName: "lottery-nft",
+        functionName: "mint",
+        functionArgs: [],
+        network,
+        appDetails: {
+          name: "Stacks March Lottery",
+          icon: window.location.origin + "/logo.png",
+        },
+      });
+
+      // Obtenemos la wallet que firmó la transacción
+      let userWallet = null;
+      if (tx.tx?.sender) userWallet = tx.tx.sender;
+      else if (tx.tx?.raw_tx?.sender) userWallet = tx.tx.raw_tx.sender;
+
+      if (!userWallet) {
+        alert("No se pudo detectar tu wallet. Intenta otra vez.");
+        return;
+      }
+
       setWallet(userWallet);
+
+      // Llamamos a la API serverless para generar número
+      const res = await fetch("/api/mint-number", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wallet: userWallet }),
+      });
+      const data = await res.json();
+      setTicketNumber(data.number);
+    } catch (err) {
+      console.error("Error al mintear:", err);
+      alert("Ocurrió un error durante el mint. Revisa la consola.");
     }
-
-    // Abrir wallet y mintear NFT
-    const txOptions = {
-      contractAddress: "SP1AJVMEGSMD6QCSZ1669Z5G90GEHVK2MEM7J0AHH",
-      contractName: "lottery-nft",
-      functionName: "mint",
-      functionArgs: [],
-      network,
-      appDetails: {
-        name: "Stacks March Lottery",
-        icon: window.location.origin + "/logo.png",
-      },
-      onFinish: () => {
-        // Después de mintear, generamos número aleatorio con fetch
-        fetch("/api/mint-number", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ wallet: userWallet }),
-        })
-          .then(res => res.json())
-          .then(data => setTicketNumber(data.number))
-          .catch(err => console.error(err));
-      },
-    };
-
-    await openContractCall(txOptions);
   };
 
   return (
@@ -65,9 +69,7 @@ export default function MintTicket() {
       </button>
 
       {wallet && (
-        <p style={{ marginTop: "15px", fontSize: "16px" }}>
-          Wallet: {wallet}
-        </p>
+        <p style={{ marginTop: "15px", fontSize: "16px" }}>Wallet: {wallet}</p>
       )}
 
       {ticketNumber && (

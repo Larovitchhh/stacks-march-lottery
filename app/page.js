@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ConnectWallet from "./components/ConnectWallet";
 import MintTicket from "./components/MintTicket";
 
@@ -19,7 +19,6 @@ export default function Home() {
       }}
     >
       <h1>🎰 Stacks March Lottery</h1>
-
       <p>Mint a lottery ticket and receive a random number from 000 to 999</p>
 
       <ConnectWallet setWallet={setWallet} />

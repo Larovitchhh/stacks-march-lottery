@@ -10,7 +10,11 @@ export default function MintTicket({ wallet }) {
   const [ticketNumber, setTicketNumber] = useState(null);
 
   const mint = async () => {
-    // 1️⃣ Ejecuta contrato
+    if (!wallet) {
+      alert("Connect your wallet first!");
+      return;
+    }
+
     const txOptions = {
       contractAddress: "SP1AJVMEGSMD6QCSZ1669Z5G90GEHVK2MEM7J0AHH",
       contractName: "lottery-nft",
@@ -22,7 +26,7 @@ export default function MintTicket({ wallet }) {
         icon: window.location.origin + "/logo.png",
       },
       onFinish: async () => {
-        // 2️⃣ Genera número aleatorio usando la API serverless
+        // Llamada a API serverless para generar número
         const res = await fetch("/api/mint-number", {
           method: "POST",
           headers: { "Content-Type": "application/json" },

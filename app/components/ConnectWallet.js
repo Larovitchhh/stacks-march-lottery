@@ -5,8 +5,7 @@ import { AppConfig, UserSession, showConnect } from "@stacks/connect";
 const appConfig = new AppConfig(["store_write"]);
 const userSession = new UserSession({ appConfig });
 
-export default function ConnectWallet() {
-
+export default function ConnectWallet({ setWallet }) {
   const connectWallet = () => {
     showConnect({
       appDetails: {
@@ -15,18 +14,15 @@ export default function ConnectWallet() {
       },
       userSession,
       onFinish: () => {
-        window.location.reload();
+        const userData = userSession.loadUserData();
+        setWallet(userData.profile.stxAddress.mainnet);
       },
     });
   };
 
   if (userSession.isUserSignedIn()) {
     const userData = userSession.loadUserData();
-    return (
-      <p>
-        Wallet connected: {userData.profile.stxAddress.mainnet}
-      </p>
-    );
+    return <p>Wallet connected: {userData.profile.stxAddress.mainnet}</p>;
   }
 
   return (
@@ -38,7 +34,7 @@ export default function ConnectWallet() {
         background: "black",
         color: "white",
         borderRadius: "8px",
-        border: "none"
+        border: "none",
       }}
     >
       Connect Wallet

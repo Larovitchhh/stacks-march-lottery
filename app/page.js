@@ -1,4 +1,5 @@
 import ConnectWallet from "./components/ConnectWallet";
+import MintTicket from "./components/MintTicket";
 
 export default function Home() {
   return (
@@ -14,9 +15,11 @@ export default function Home() {
     >
       <h1>🎰 Stacks March Lottery</h1>
 
-      <p>Connect your wallet to participate in the March lottery</p>
+      <p>Mint a lottery ticket and receive a random number from 000 to 999</p>
 
       <ConnectWallet />
+
+      <MintTicket />
     </main>
   );
 }

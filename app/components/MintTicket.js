@@ -1,16 +1,19 @@
 "use client";
 
-import { openContractCall } from "@stacks/connect";
+import { openContractCall, UserSession, AppConfig } from "@stacks/connect";
 import { StacksMainnet } from "@stacks/network";
 import { useState } from "react";
 
 const network = new StacksMainnet();
+const appConfig = new AppConfig(["store_write"]);
+const userSession = new UserSession({ appConfig });
 
 export default function MintTicket() {
   const [ticketNumber, setTicketNumber] = useState(null);
   const [wallet, setWallet] = useState(null);
 
   const mint = async () => {
+    // Abrir wallet y mintear NFT
     const txOptions = {
       contractAddress: "SP1AJVMEGSMD6QCSZ1669Z5G90GEHVK2MEM7J0AHH",
       contractName: "lottery-nft",
@@ -21,23 +24,22 @@ export default function MintTicket() {
         name: "Stacks March Lottery",
         icon: window.location.origin + "/logo.png",
       },
-      onFinish: async (data) => {
-        console.log("Transaction submitted:", data);
+      onFinish: async () => {
+        // ⚡ Tomar la wallet conectada desde UserSession
+        if (userSession.isUserSignedIn()) {
+          const userData = userSession.loadUserData();
+          const userWallet = userData.profile.stxAddress.mainnet;
+          setWallet(userWallet);
 
-        // 1️⃣ Sacamos la wallet de la transacción
-        const txSender = data.tx.raw_tx.sender || null;
-        if (!txSender) return;
-
-        setWallet(txSender);
-
-        // 2️⃣ Llamamos a la API serverless para generar número
-        const res = await fetch("/api/mint-number", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ wallet: txSender }),
-        });
-        const result = await res.json();
-        setTicketNumber(result.number);
+          // Llamar a la API serverless para generar número
+          const res = await fetch("/api/mint-number", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ wallet: userWallet }),
+          });
+          const data = await res.json();
+          setTicketNumber(data.number);
+        }
       },
     };
 
